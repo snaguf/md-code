@@ -1,18 +1,20 @@
 use pulldown_cmark::{Event, Options, Parser, Tag};
 
 fn get_code<'a>(
-    (mut events, in_block): (Vec<Event<'a>>, bool),
+    (mut code, in_block): (Vec<String>, bool),
     event: Event<'a>,
-) -> (Vec<Event<'a>>, bool) {
+) -> (Vec<String>, bool) {
     let is_code = match event {
         Event::Start(Tag::CodeBlock(..)) => true,
         Event::End(Tag::CodeBlock(..)) => false,
         _ => in_block,
     };
     if in_block && is_code {
-        events.push(event)
+        if let Event::Text(borrowed) = event {
+            code.push(borrowed.into_string())
+        }
     };
-    return (events, is_code);
+    return (code, is_code);
 }
 
 fn main() {
